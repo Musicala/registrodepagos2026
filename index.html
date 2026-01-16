@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ingreso de Datos de Pago · Musicala</title>
+
+  <!-- ✅ OJO: tu archivo es style.css, no styles.css -->
+  <link rel="stylesheet" href="./style.css" />
+
+  <!-- Fuente opcional (se ve más pro que system-ui) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <header class="top">
+    <div class="top__inner">
+      <div class="brand">
+        <img class="logo" src="https://static.wixstatic.com/media/d84a8e_a0139d556e2b46419a864779fcb78f53~mv2.jpg" alt="Musicala" />
+        <div class="brand__text">
+          <h1>Ingreso de Datos de Pago</h1>
+          <p>Formulario web para registrar pagos</p>
+        </div>
+      </div>
+
+      <div class="top__meta">
+        <span class="pill">Musicala · Pagos</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <form id="formPago" class="card">
+      <div class="card__head">
+        <div class="card__title">
+          <h2>Registro</h2>
+          <p>Recuerda rellenar todos los campos obligatorios.</p>
+        </div>
+        <div class="card__badge" aria-hidden="true">💳</div>
+      </div>
+
+      <section class="block">
+        <div class="block__head">
+          <h3>Pago</h3>
+          <span class="chip chip--req">Obligatorio</span>
+        </div>
+
+        <div class="field">
+          <label class="required" for="fechaPago">Fecha de pago</label>
+          <input type="date" id="fechaPago" required />
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="block__head">
+          <h3>Usuario 1</h3>
+          <span class="chip chip--req">Obligatorio</span>
+        </div>
+
+        <div class="field">
+          <label class="required" for="usuario1Input">Estudiante</label>
+          <input type="text" id="usuario1Input" placeholder="Escribe para buscar..." autocomplete="off" />
+          <select id="usuario1Dropdown"></select>
+          <p class="help">Tip: escribe 2 o 3 letras y busca en la lista.</p>
+        </div>
+
+        <div class="field">
+          <label for="usuarioNoRegistrado">Usuario no registrado</label>
+          <input type="text" id="usuarioNoRegistrado" placeholder="Nombre del usuario no registrado" />
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label class="required" for="servicio1Input">Servicio</label>
+            <input type="text" id="servicio1Input" placeholder="Escribe para buscar..." autocomplete="off" />
+            <select id="servicio1Dropdown" required></select>
+          </div>
+
+          <div class="field">
+            <label class="required" for="precioServicio1">Precio (COP)</label>
+            <input type="number" id="precioServicio1" min="0" step="1" placeholder="0" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="ciclo1">Ciclo</label>
+          <input type="number" id="ciclo1" min="0" step="1" placeholder="Ciclo manual" />
+        </div>
+      </section>
+
+      <section class="block block--soft">
+        <div class="block__head">
+          <h3>Usuario 2</h3>
+          <span class="chip">Opcional</span>
+        </div>
+
+        <div class="field">
+          <label for="usuario2Input">Estudiante</label>
+          <input type="text" id="usuario2Input" placeholder="Escribe para buscar..." autocomplete="off" />
+          <select id="usuario2Dropdown"></select>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label for="servicio2Input">Servicio</label>
+            <input type="text" id="servicio2Input" placeholder="Escribe para buscar..." autocomplete="off" />
+            <select id="servicio2Dropdown"></select>
+          </div>
+
+          <div class="field">
+            <label for="precioServicio2">Precio (COP)</label>
+            <input type="number" id="precioServicio2" min="0" step="1" placeholder="0" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="ciclo2">Ciclo</label>
+          <input type="number" id="ciclo2" min="0" step="1" placeholder="Ciclo manual" />
+        </div>
+      </section>
+
+      <section class="block block--soft">
+        <div class="block__head">
+          <h3>Usuario 3</h3>
+          <span class="chip">Opcional</span>
+        </div>
+
+        <div class="field">
+          <label for="usuario3Input">Estudiante</label>
+          <input type="text" id="usuario3Input" placeholder="Escribe para buscar..." autocomplete="off" />
+          <select id="usuario3Dropdown"></select>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label for="servicio3Input">Servicio</label>
+            <input type="text" id="servicio3Input" placeholder="Escribe para buscar..." autocomplete="off" />
+            <select id="servicio3Dropdown"></select>
+          </div>
+
+          <div class="field">
+            <label for="precioServicio3">Precio (COP)</label>
+            <input type="number" id="precioServicio3" min="0" step="1" placeholder="0" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="ciclo3">Ciclo</label>
+          <input type="number" id="ciclo3" min="0" step="1" placeholder="Ciclo manual" />
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="block__head">
+          <h3>Detalles</h3>
+          <span class="chip chip--req">Obligatorio: medio</span>
+        </div>
+
+        <div class="field">
+          <label class="required" for="medioPago">Medio de pago</label>
+          <select id="medioPago" required></select>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label for="recargo">Recargo (COP)</label>
+            <input type="number" id="recargo" min="0" step="1" placeholder="0" />
+          </div>
+          <div class="field">
+            <label for="descuento">Descuento (COP)</label>
+            <input type="number" id="descuento" min="0" step="1" placeholder="0" />
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label for="FEVM">FEVM (COP)</label>
+            <input type="number" id="FEVM" min="0" step="1" placeholder="0" />
+          </div>
+          <div class="field">
+            <label for="comentario">Comentario</label>
+            <input type="text" id="comentario" placeholder="Comentario..." />
+          </div>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button type="button" class="btn ghost" id="btnReset">Limpiar</button>
+        <button type="submit" class="btn primary" id="btnSend">
+          <span class="btn__text">Guardar</span>
+          <span class="btn__icon" aria-hidden="true">→</span>
+        </button>
+      </div>
+
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+    </form>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
