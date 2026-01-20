@@ -5,6 +5,7 @@
 // - Precio sugerido: funciona con el tipo seleccionado + botones "Sugerido"
 // - Total general: en vivo
 // - Debug servidor: action=debug
+// - ✅ NUEVO: al guardar exitosamente, limpia el formulario automáticamente
 
 // 1) URL Web App (Apps Script)
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzHW7Pnz39SKihDDHprCyvcSXzzDg9wnxvGwxud9o6KBCgpjFd95G5eUf8r8MTDdnyFzQ/exec";
@@ -372,7 +373,9 @@ async function submitPago(datos) {
 // =========================
 // Reset
 // =========================
-function resetForm() {
+function resetForm(opts={}) {
+  const keepStatus = !!opts.keepStatus;
+
   $("formPago")?.reset();
 
   // reset manual flags para que vuelva a sugerir
@@ -401,7 +404,7 @@ function resetForm() {
   const dbg = $("debugServer");
   if (dbg) dbg.textContent = "";
 
-  setStatus("");
+  if (!keepStatus) setStatus("");
   calcTotalGeneral_();
 }
 
@@ -446,8 +449,9 @@ async function init() {
 
     try {
       await submitPago(datos);
+      resetForm({ keepStatus: true }); // ✅ limpia automático sin borrar el status
       setStatus("Guardado ✅");
-      // resetForm(); // si quieres que se limpie automáticamente, descomenta
+      $("fechaPago")?.focus?.();
     } catch (e) {
       setStatus("❌ Error enviando: " + (e?.message || e));
     } finally {
