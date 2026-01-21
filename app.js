@@ -1,11 +1,13 @@
 // =========================
-// Musicala Pagos 2026 — app.js (FULL) v3
+// Musicala Pagos 2026 — app.js (FULL) v3.1
 // =========================
 // - Tipo de estudiante: botones Antiguos/Convenios vs Nuevos
 // - Precio sugerido: funciona con el tipo seleccionado + botones "Sugerido"
 // - Total general: en vivo
 // - Debug servidor: action=debug
-// - ✅ NUEVO: al guardar exitosamente, limpia el formulario automáticamente
+// - ✅ Guarda y limpia automático
+// - ✅ NUEVO: buscador de servicios/usuarios permite MODIFICAR después de buscar
+//    (sin perder selección cuando aplica, y sincroniza input <-> select)
 
 // 1) URL Web App (Apps Script)
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzHW7Pnz39SKihDDHprCyvcSXzzDg9wnxvGwxud9o6KBCgpjFd95G5eUf8r8MTDdnyFzQ/exec";
@@ -35,11 +37,31 @@ function fillSelect(selectId, items, placeholder="Seleccionar...") {
   });
 }
 
+/**
+ * Filtra un select basado en un input, PERO:
+ * - preserva la selección si aún existe en el filtrado
+ * - no “bloquea” la posibilidad de cambiar después
+ */
 function filterToSelect(inputId, selectId, items, placeholder="Seleccionar...") {
   const input = $(inputId);
+  const sel   = $(selectId);
+  if (!sel) return;
+
+  const prev = sel.value || "";
   const q = (input?.value || "").toLowerCase().trim();
-  const filtered = !q ? (items || []) : (items || []).filter(x => String(x).toLowerCase().includes(q));
+
+  const filtered = !q
+    ? (items || [])
+    : (items || []).filter(x => String(x).toLowerCase().includes(q));
+
   fillSelect(selectId, filtered, placeholder);
+
+  // Preservar selección si todavía existe dentro del filtro
+  if (prev && filtered.includes(prev)) {
+    sel.value = prev;
+  } else {
+    sel.value = ""; // vuelve a placeholder si ya no aplica
+  }
 }
 
 function normalizeMoneyInput(val){
@@ -80,6 +102,42 @@ function jsonp(url) {
     };
 
     document.body.appendChild(script);
+  });
+}
+
+// =========================
+// Buscador input <-> select (NUEVO)
+// =========================
+function bindSearchableSelect_(inputId, selectId, getItemsFn, placeholder="Seleccionar..."){
+  const input = $(inputId);
+  const sel = $(selectId);
+  if (!sel) return;
+
+  const itemsNow = () => (typeof getItemsFn === "function" ? (getItemsFn() || []) : (getItemsFn || []));
+
+  // 1) Escribir filtra
+  input?.addEventListener("input", () => {
+    filterToSelect(inputId, selectId, itemsNow(), placeholder);
+  });
+
+  // 2) Cambiar en select => copia al input (para poder editar y volver a filtrar fácil)
+  sel.addEventListener("change", () => {
+    if (input) input.value = sel.value || "";
+  });
+
+  // 3) Focus: selecciona texto para cambiar rápido
+  input?.addEventListener("focus", () => {
+    try { input.select(); } catch {}
+  });
+
+  // 4) ESC: limpia búsqueda y repuebla todo
+  input?.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") {
+      input.value = "";
+      fillSelect(selectId, itemsNow(), placeholder);
+      // no tocamos sel.value aquí, que el usuario decida
+      ev.preventDefault();
+    }
   });
 }
 
@@ -271,14 +329,14 @@ async function loadMeta() {
   // Medios de pago
   fillSelect("medioPago", META.mediosPago || []);
 
-  // Filtros progresivos (si existen los inputs)
-  $("usuario1Input")?.addEventListener("input", () => filterToSelect("usuario1Input", "usuario1Dropdown", META.estudiantes || []));
-  $("usuario2Input")?.addEventListener("input", () => filterToSelect("usuario2Input", "usuario2Dropdown", META.estudiantes || []));
-  $("usuario3Input")?.addEventListener("input", () => filterToSelect("usuario3Input", "usuario3Dropdown", META.estudiantes || []));
+  // ✅ Buscadores inteligentes (NUEVO)
+  bindSearchableSelect_("usuario1Input", "usuario1Dropdown", () => (META.estudiantes || []));
+  bindSearchableSelect_("usuario2Input", "usuario2Dropdown", () => (META.estudiantes || []));
+  bindSearchableSelect_("usuario3Input", "usuario3Dropdown", () => (META.estudiantes || []));
 
-  $("servicio1Input")?.addEventListener("input", () => filterToSelect("servicio1Input", "servicio1Dropdown", sn));
-  $("servicio2Input")?.addEventListener("input", () => filterToSelect("servicio2Input", "servicio2Dropdown", sn));
-  $("servicio3Input")?.addEventListener("input", () => filterToSelect("servicio3Input", "servicio3Dropdown", sn));
+  bindSearchableSelect_("servicio1Input", "servicio1Dropdown", () => serviciosNames());
+  bindSearchableSelect_("servicio2Input", "servicio2Dropdown", () => serviciosNames());
+  bindSearchableSelect_("servicio3Input", "servicio3Dropdown", () => serviciosNames());
 
   // Auto-precios según tipo (DESPUÉS de llenar selects)
   bindPrecioAuto("servicio1Dropdown", "precioServicio1");
@@ -395,6 +453,12 @@ function resetForm(opts={}) {
   fillSelect("servicio1Dropdown", sn);
   fillSelect("servicio2Dropdown", sn);
   fillSelect("servicio3Dropdown", sn);
+
+  // limpia inputs de búsqueda (para que no se queden filtrando)
+  ["usuario1Input","usuario2Input","usuario3Input","servicio1Input","servicio2Input","servicio3Input"].forEach(id=>{
+    const el = $(id);
+    if (el) el.value = "";
+  });
 
   // vuelve a default tipo
   const defaultTipo = pickTipoByKeywords_(["antigu", "conven"]) || (META.tiposEstudiante?.[0] || "");
