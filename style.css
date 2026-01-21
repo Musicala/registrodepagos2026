@@ -378,6 +378,7 @@ select{
 @media (prefers-reduced-motion: reduce){
   *{ transition:none !important; }
 }
+
 /* =========================
    Detalles: Medio pago + Total a la derecha
 ========================= */
@@ -417,6 +418,7 @@ label[for="medioPago"]{
   letter-spacing: -0.02em;
   color: var(--bach);
 }
+
 .hintRight{
   margin-left:auto;
   width:max-content;
