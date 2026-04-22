@@ -13,6 +13,7 @@
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzHW7Pnz39SKihDDHprCyvcSXzzDg9wnxvGwxud9o6KBCgpjFd95G5eUf8r8MTDdnyFzQ/exec";
 
 let META = { estudiantes: [], servicios: [], tiposEstudiante: [], mediosPago: [] };
+const MAX_OPTIONS_RENDER = 250;
 
 // DOM helper
 const $ = (id) => document.getElementById(id);
@@ -22,19 +23,28 @@ function setStatus(msg){
   if (el) el.textContent = msg || "";
 }
 
+function escHtml_(s){
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 // =========================
 // UI helpers
 // =========================
 function fillSelect(selectId, items, placeholder="Seleccionar...") {
   const sel = $(selectId);
   if (!sel) return;
-  sel.innerHTML = `<option value="">${placeholder}</option>`;
-  (items || []).forEach(x => {
-    const opt = document.createElement("option");
-    opt.value = x;
-    opt.textContent = x;
-    sel.appendChild(opt);
-  });
+  const safeItems = items || [];
+  let html = `<option value="">${placeholder}</option>`;
+  for (let i = 0; i < safeItems.length; i++) {
+    const x = String(safeItems[i] ?? "");
+    const safe = escHtml_(x);
+    html += `<option value="${safe}">${safe}</option>`;
+  }
+  sel.innerHTML = html;
 }
 
 /**
@@ -53,15 +63,24 @@ function filterToSelect(inputId, selectId, items, placeholder="Seleccionar...") 
   const filtered = !q
     ? (items || [])
     : (items || []).filter(x => String(x).toLowerCase().includes(q));
+  const renderItems = filtered.slice(0, MAX_OPTIONS_RENDER);
 
-  fillSelect(selectId, filtered, placeholder);
+  fillSelect(selectId, renderItems, placeholder);
 
   // Preservar selección si todavía existe dentro del filtro
-  if (prev && filtered.includes(prev)) {
+  if (prev && renderItems.includes(prev)) {
     sel.value = prev;
   } else {
     sel.value = ""; // vuelve a placeholder si ya no aplica
   }
+}
+
+function debounce_(fn, wait=120){
+  let t = null;
+  return (...args) => {
+    if (t) clearTimeout(t);
+    t = setTimeout(() => fn(...args), wait);
+  };
 }
 
 function normalizeMoneyInput(val){
@@ -116,9 +135,10 @@ function bindSearchableSelect_(inputId, selectId, getItemsFn, placeholder="Selec
   const itemsNow = () => (typeof getItemsFn === "function" ? (getItemsFn() || []) : (getItemsFn || []));
 
   // 1) Escribir filtra
-  input?.addEventListener("input", () => {
+  const onInput = debounce_(() => {
     filterToSelect(inputId, selectId, itemsNow(), placeholder);
-  });
+  }, 120);
+  input?.addEventListener("input", onInput);
 
   // 2) Cambiar en select => copia al input (para poder editar y volver a filtrar fácil)
   sel.addEventListener("change", () => {
